@@ -5,7 +5,7 @@ RUN yum -y update
 # --- install emacs --- #
 
 ARG emacs=emacs-24.5
-RUN yum install -y gcc lcurses-devel wget ncurses-devel gpm-libs alsa-lib perl gnutls-devel
+RUN yum install -y gcc lcurses-devel wget ncurses-devel gpm-libs alsa-lib perl gnutls-devel && yum clean all
 
 ARG work_dir=/tmp/setup
 RUN mkdir ${work_dir} && \
@@ -18,11 +18,10 @@ RUN cd /etc/yum.repos.d && \
 # --- install autoconf --- #
 
 ARG autoconf=autoconf-2.69
-RUN yum install -y m4 perl-ExtUtils-MakeMaker
+RUN yum install -y m4 perl-ExtUtils-MakeMaker && yum clean all
 
 RUN cd ${work_dir} && \
-    wget http://ftp.gnu.org/gnu/autoconf/${autoconf}.tar.gz && \
-    tar zxf ${autoconf}.tar.gz && \
+    wget -O - http://ftp.gnu.org/gnu/autoconf/${autoconf}.tar.gz | tar zxf -&& \
     cd ${autoconf} && \
     ./configure && \
     make && \
@@ -31,15 +30,16 @@ RUN cd ${work_dir} && \
 # --- install git --- #
 
 ARG git_ver=2.9.0
-RUN yum install -y zlib-devel tcl gettext-devel libcurl-devel
+RUN yum install -y zlib-devel tcl gettext-devel libcurl-devel && yum clean all
 
 RUN cd ${work_dir} && \
-    wget https://www.kernel.org/pub/software/scm/git/git-${git_ver}.tar.gz && \
-    tar zxf git-${git_ver}.tar.gz && \
+    wget -O - https://www.kernel.org/pub/software/scm/git/git-${git_ver}.tar.gz | tar zxf - && \
     cd git-${git_ver} && \
     ./configure --with-curl && \
     make && \
-    make install
+    make install && \
+    cd .. && \
+    rm -rf git-${git_ver}
 
 # --- install roswell and some common lisp implementations --- #
 
@@ -49,14 +49,16 @@ RUN cd ${work_dir} && \
     sh bootstrap && \
     ./configure && \
     make && \
-    make install
+    make install && \
+    cd .. && \
+    rm -rf roswell
 
 # ----------------------------- #
 # --- make a developer user --- #
 
 ARG user=dev
 ARG user_pass=dev000
-RUN yum install -y sudo
+RUN yum install -y sudo && yum clean all
 
 RUN adduser ${user} && \
     echo ${user_pass} | passwd ${user} --stdin && \
@@ -83,17 +85,13 @@ RUN ros install sbcl-bin && \
 RUN ros use sbcl && \
     ln -s ${HOME}/.roswell/local-projects work
 
-ADD init.el ${emacs_home}
-RUN echo ${user_pass} | sudo -S chown ${user}:${user} ${emacs_home}/init.el
-
 # --- install HyperSpec --- #
 
 ARG hyperspec=HyperSpec-7-0
-RUN echo ${user_pass} | sudo -S yum install -y w3m
+RUN echo ${user_pass} | sudo -S bash -c "yum install -y w3m && yum clean all"
 
 RUN cd ${work_dir} && \
-    wget ftp://ftp.lispworks.com/pub/software_tools/reference/${hyperspec}.tar.gz && \
-    tar zxf ${hyperspec}.tar.gz && \
+    wget -O - ftp://ftp.lispworks.com/pub/software_tools/reference/${hyperspec}.tar.gz | tar zxf - && \
     mv HyperSpec ${emacs_docs}
 
 # --- install slime-repl-color --- #
@@ -103,4 +101,9 @@ RUN cd ${site_lisp} && \
 
 # --- run emacs for installing packages --- #
 
+COPY init.el ${emacs_home}
+RUN echo ${user_pass} | sudo -S chown ${user}:${user} ${emacs_home}/init.el
 RUN emacs --batch --load .emacs.d/init.el
+
+# --- run packages for convenience --- #
+RUN echo ${user_pass} | sudo -S bash -c "yum install -y openssh openssh-clients && yum clean all"
