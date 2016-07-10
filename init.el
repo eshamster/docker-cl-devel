@@ -42,7 +42,16 @@
 (setq scroll-conservatively 1)
 (set-face-foreground 'font-lock-comment-face "#ee0909")
 (show-paren-mode t)
+
+;; -- icomplete-mode -- ;;
 (icomplete-mode 1)
+;; enable to toggle candidates by C-f or C-b 
+(add-hook 'icomplete-minibuffer-setup-hook
+          '(lambda ()
+             (local-set-key "\C-f" 'icomplete-forward-completions)
+             (local-set-key "\C-b" 'icomplete-backward-completions)))
+
+;; -- -- ;;
 
 ;; mode-line
 (setq frame-title-format (format "emacs@%s : %%f" (system-name)))
