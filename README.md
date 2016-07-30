@@ -25,8 +25,9 @@ This mainly consists of ...
 
 ## Known issues
 
-- In my environment, the layout of Emacs is often corrupted
-  - This is temporally fixed by Ctrl-l, but very annoying...
+- In Docker 1.10, the layout of Emacs is often corrupted
+  - Please use Docker 1.11 (or newer version)
+    - Please see the issue for more information: <https://github.com/docker/docker/issues/15373>
 
 ---------
 
