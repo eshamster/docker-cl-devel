@@ -119,6 +119,8 @@
   #'(define-key paredit-mode-map (kbd "C-c f") 'paredit-forward-slurp-sexp))
 (eval-after-load "paredit"
   #'(define-key paredit-mode-map (kbd "C-c b") 'paredit-forward-barf-sexp))
+(eval-after-load "paredit"
+  #'(define-key paredit-mode-map (kbd "C-h") 'paredit-backward-delete))
 (global-set-key (kbd "C-c m p") 'paredit-mode)
 
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
