@@ -1,3 +1,7 @@
+***This is obsoleted. [docker-cl-devel2](https://github.com/eshamster/docker-cl-devel2) is the successor.***
+
+***Note: This can't be used for automated build in Dockerhub because this includes build for Emacs (that requires change of OS parameter).***
+
 # Dockerfile: cl-devel
 
 [WIP] A Dockerfile to configure Common Lisp development environment.
